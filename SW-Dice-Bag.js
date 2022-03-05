@@ -1,91 +1,83 @@
 // macro to display buttons for rolling common SW dice
-// /em Choose Dice...   [**d4w**](!SW-Dice --d4w)[**d6w**](!SW-Dice --d6w)
-// [**d8w**](!SW-Dice --d8w)[**d10w**](!SW-Dice --d10w)[**d12w**](!SW-Dice --d12w)
-// [**2d4!**](!SW-Dice --2d4!)[2d6!](!SW-Dice --2d6!)[3d6!](!SW-Dice --3d6!)
-// [2d8!](!SW-Dice --2d8!)[2d10!](!SW-Dice --2d10!)
-// [2d12!](!SW-Dice --2d12!)[d100](!SW-Dice --d100)
+// Usage: !SW-Dice --trait --d6 -7  (roll d6! and no wild 7 times)
+// Usage: !SW-Dice --trait --d6w -7  (roll d6! and d6! wild 7 times)
+// Usage: !SW-Dice --damage --2d6 -7  (roll 2d6! and d6! raise 7 times)
+//
 //
 // send api call to parser below
 //
 // -----------------------------------  START ----------------------------
-// catch the invocation command (!SW-Dice )
-on('chat:message', function(msg) {
 
-   // Only run when message is an api type and contains "!SW-Dice"
-   if (msg.type === 'api' && msg.content.indexOf('!SW-Dice') !== -1) {
+on('ready', () => {
+    const version = '1.1.0'; // script version
+    log('-=> SW-Dice v' + version + ' <=-');
 
-    var args = [];
-    
-    args = msg.content
-        .replace(/<br\/>\n/g, ' ')
-        .replace(/(\{\{(.*?)\}\})/g," $2 ")
-        .split(/\s+--/);
-        
-    // bail out if api call is not to SW-Dice
-    if (args.shift() !== "!SW-Dice") {
-        // log('-=> SW Dice: Not calling [!SW-Dice] exiting... <=- ');
-		return;
-	 }
+    // catch the invocation command (!SW-Dice )
+    on('chat:message', function (msg) {
 
-    // HR
-    sendChat("Rolling", "--- " + args[0] + " ---");  
+        // Only run when message is an api type and contains "!SW-Dice"
+        if (msg.type === 'api' && msg.content.indexOf('!SW-Dice') !== -1) {
 
-    var numRolls = 1;
-    if (args[1] && args[1] > 1) {   
-       numRolls = args[1];
-    }
+            var args = [];
 
-    // parse dice
+            args = msg.content
+                .replace(/<br\/>\n/g, ' ')
+                .replace(/(\{\{(.*?)\}\})/g, " $2 ")
+                .split(/\s+--/);
 
-//     if (args[0] === "d4w") {       
-//         sendChat("Skill", "[[d4!cf<1]] Wild:[[d6!cf<1]] Frenzy: [[d4!]] [[d4!]] ");
-//         return;
-// 	 }
-//     if (args[0] === "d6w") {
-//         sendChat("SW-Dice", "d6!:[[d6!]] W:[[d6!]]");
-//         return;
-// 	 }
-//     if (args[0] === "d8w") {
-//         sendChat("SW-Dice", "d8!:[[d8!]] W:[[d6!]]");
-//         return;
-// 	 }
-//     if (args[0] === "d10w") {
-//         sendChat("SW-Dice", "d10!:[[d10!]] W:[[d6!]]");
-//         return;
-// 	 }
-//     if (args[0] === "d12w") {
-//         sendChat("SW-Dice", "d12!:[[d12!]] W:[[d6!]]");
-//         return;
-// 	 }
-	 
+            // bail out if api call is not to SW-Dice
+            if (args.shift() !== "!SW-Dice") {
+                // log('-=> SW Dice: Not calling [!SW-Dice] exiting... <=- ');
+                return;
+            }
 
-	 var skillDie = "";
-    if (args[0] === "d4w") {
-        skillDie = "d4";        
- 	 }
-    if (args[0] === "d6w") {
-        skillDie = "d6";        
-	 }
-    if (args[0] === "d8w") {
-        skillDie = "d8";        
-	 }
-    if (args[0] === "d10w") {
-        skillDie = "d10";        
-	 }
-    if (args[0] === "d12w") {
-        skillDie = "d12";        
-	 }
-	 
-	 var i;
-	 for (i = 0; i < numRolls; i++) {
-   	 if (args[0].includes('w')) {
-	        sendChat("", "**Skill:** [[" + skillDie + "!cf<1]] Wild:[[d6!cf<1]] Frenzy: " + "[[" + skillDie + "!cf<1]]" + "[[" + skillDie + "!cf<1]]" );
-	    }
-       else {
-   	    // default to rolling whatever is passed
-          sendChat("", "**Damage:** [[" + args[0] + "]] Raise: [[d6!cf<1]]");  
-       }
-    }
-    return; 
-  }
-});
+            if (!(args[0] && args[1] && args[2])) { // args [0]   [1]  [2]
+                sendChat("SW-Dice", "\nUsage: !SW-Dice --trait --d6w --6  (roll type (trait|damage), roll string(d6|d6w), # rolls)");
+                return;
+            }
+
+            var numRolls = parseInt(args[2]) + 1; // loop counts from 1
+
+            // parse dice
+            var skillDie = args[1];
+            if (args[1] === "d4w") {
+                skillDie = "d4";
+            }
+            if (args[1] === "d6w") {
+                skillDie = "d6";
+            }
+            if (args[1] === "d8w") {
+                skillDie = "d8";
+            }
+            if (args[1] === "d10w") {
+                skillDie = "d10";
+            }
+            if (args[1] === "d12w") {
+                skillDie = "d12";
+            }
+
+            // build up the table for output
+            var print_table = "&{template:default}  {{name=**" + args[0].toUpperCase() + "** Roll: " + args[1] + "}}"
+
+
+            var i;
+            for (i = 1; i < numRolls; i++) {
+                if (args[0].includes('trait')) {
+                    if (args[1].includes('w')) {
+                        print_table = print_table + "{{ " + i.toString() + ":=Trait: [[" + skillDie + "!]], Wild:[[d6!]] }}";
+                    }
+                    else {
+                        print_table = print_table + "{{ " + i.toString() + ":=Trait: [[" + skillDie + "!]]  }}";
+                    }
+                }
+                else {
+                    print_table = print_table + "{{ " + i.toString() + ":=Damage: [[" + skillDie + "!]], Raise:[[d6!]] }}";
+                }
+            }
+            // print result
+            sendChat("SW-Dice", "\n"+print_table);
+
+        } // end if msg SW Dice
+
+    }); // end on chat message
+}); // end on ready
