@@ -7,6 +7,11 @@
 // send api call to parser below
 //
 // -----------------------------------  START ----------------------------
+//
+// Trick from Aaron to fix "Syntax Error: Unexpected Identifier" - put a ";" at top of script
+// The API Server concatenates all the scripts together, which can lead to code that isn't
+// correct when a programmer relies on automatic semicolon insertion.
+;
 
 on('ready', () => {
     const version = '1.1.0'; // script version
@@ -57,11 +62,11 @@ on('ready', () => {
             }
 
             // build up the table for output
-            var print_table = "&{template:default}  {{name=**" + args[0].toUpperCase() + "** Roll: " + args[1] + "}}"
+            var print_table = "&{template:default}  {{name=**" + args[0].toUpperCase() + "** Roll: " + args[1] + "}}";
 
 
             var i;
-            for (i = 1; i < numRolls; i++) {
+            for (i = 1; i < numRolls; i += 1) {
                 if (args[0].includes('trait')) {
                     if (args[1].includes('w')) {
                         print_table = print_table + "{{ " + i.toString() + ":=Trait: [[" + skillDie + "!]], Wild:[[d6!]] }}";
