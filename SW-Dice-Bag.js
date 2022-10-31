@@ -14,7 +14,7 @@
 ;
 
 on('ready', () => {
-    const version = '1.1.0'; // script version
+    const version = '1.1.1'; // script version
     log('-=> SW-Dice v' + version + ' <=-');
 
     // catch the invocation command (!SW-Dice )
